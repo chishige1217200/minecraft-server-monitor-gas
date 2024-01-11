@@ -97,6 +97,7 @@ function refreshSysStatus() {
   let systemText = systemSheet.getRange(2, 3).getValue();
 
   if (calcTimeDiff > 60 && systemText === "正常稼働中") {
+    notifyToDiscord();
     systemSheet.getRange(2, 3).setValue("障害発生");
   }
 }
@@ -111,4 +112,35 @@ function calcTimeDiff() {
   // 前回更新時からの経過分を返す
   diff = diff / (60 * 1000);
   return diff;
+}
+
+function getDateString(format) {
+  // 指定の体裁で時刻取得
+  let date = new Date();
+  return Utilities.formatDate(date, "GMT+9", format).toString();
+}
+
+function notifyToDiscord() {
+  // discord側で作成したボットのウェブフックURL
+  const discordWebHookURL =
+    "";
+
+  // 時刻取得
+  let result = getDateString("[yyyy/MM/dd HH:mm:ss] ");
+
+  let messtr = "サーバで障害が発生しました．状況を確認してください．";
+
+  // 投稿するチャット内容と設定
+  const message = {
+    content: result + messtr, // チャット本文
+    tts: false, // ロボットによる読み上げ機能を無効化
+  };
+
+  const param = {
+    method: "POST",
+    headers: { "Content-type": "application/json" },
+    payload: JSON.stringify(message),
+  };
+
+  UrlFetchApp.fetch(discordWebHookURL, param);
 }
